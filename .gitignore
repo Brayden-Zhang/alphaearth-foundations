@@ -1,0 +1,8 @@
+/.github
+/.idea/
+/.vscode/
+/dist/
+/.env
+/.pytest_cache
+/examples
+/tests
