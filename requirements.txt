@@ -32,3 +32,5 @@ pytest>=7.0.0
 black>=22.0.0
 flake8>=5.0.0
 mypy>=0.971
+pystac-client>=0.7.5
+requests>=2.31.0

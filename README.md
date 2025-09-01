@@ -6,12 +6,12 @@ Accompanying the paper is a global dataset of embeddings from 2017 to 2024, avai
 > [!NOTE]
 > This model is a work in progress and was not actually trained on the full dataset, it is just a framework that provides a general base for the paper's architecture. The code is simplified compared to the DeepMind's actual implementation (in JAX). 
 
-### Key Features & Innovations
+### Key parts of the methodology
 
 - **Continuous Time Support**: First EO featurization approach to support continuous time, allowing for temporal interpolation and extrapolation.
 - **Space Time Precision (STP) Architecture**: Multi-resolution encoder with spatial (1/16L), temporal (1/8L), and precision (1/2L) operators - designed to maintain localized representations while also modeling long-distance relationships across time and space. 
 - **von Mises-Fisher Embeddings**: 64-byte embeddings distributed on unit sphere S^63, very compact representation. 
-- **Comprehensive Evaluation**: 15-task evaluation suite across 11 datasets, comparing against baseline vision transformers and other geospatial foundation models such as Clay, SatCLIP, and Prithvi.
+
 
 ## Architecture
 
@@ -32,7 +32,7 @@ The STP encoder processes multi-temporal, multi-source data through three simult
 ## Data Sources
 
 The model is trained on many data sources including:
-- **Optical**: Sentinel-2, Landsat 8/9. *Note: for simplicty, my implementation only supports Sentinel-2 and Landsat 8/9.*
+- **Optical**: Sentinel-2, Landsat 8/9. *Note: for simplicty, my implementation only supports Sentinel-2, but it should be relatively straightforward to add new datasets to the training*
 - **Radar**: Sentinel-1, PALSAR2
 - **LiDAR**: GEDI
 - **Environmental**: GLO-30, ERA5-Land, GRACE
@@ -52,6 +52,10 @@ uv pip install -r requirements.txt
 uv pip install -e .
 ```
 
+How to run a training step:
+```
+python -m alphaearth.run_train
+```
 
 ## Paper Citation
 
