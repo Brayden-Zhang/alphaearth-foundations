@@ -60,10 +60,13 @@ python -m alphaearth.run_train
 ## Paper Citation
 
 ```bibtex
-@article{brown2025alphaearth,
-  title={AlphaEarth Foundations: An embedding field model for accurate and efficient global mapping from sparse label data},
-  author={Brown, Christopher F and Kazmierski, Michal R and Pasquarella, Valerie J and others},
-  journal={arXiv preprint arXiv:2507.22291},
-  year={2025}
+@misc{brown2025alphaearthfoundationsembeddingfield,
+      title={AlphaEarth Foundations: An embedding field model for accurate and efficient global mapping from sparse label data}, 
+      author={Christopher F. Brown and Michal R. Kazmierski and Valerie J. Pasquarella and William J. Rucklidge and Masha Samsikova and Chenhui Zhang and Evan Shelhamer and Estefania Lahera and Olivia Wiles and Simon Ilyushchenko and Noel Gorelick and Lihui Lydia Zhang and Sophia Alj and Emily Schechter and Sean Askay and Oliver Guinan and Rebecca Moore and Alexis Boukouvalas and Pushmeet Kohli},
+      year={2025},
+      eprint={2507.22291},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV},
+      url={https://arxiv.org/abs/2507.22291}, 
 }
 ```
