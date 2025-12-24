@@ -4,7 +4,7 @@ A PyTorch implementation of the AlphaEarth geospatial foundation model from Goog
 Accompanying the paper is a global dataset of embeddings from 2017 to 2024, available through Earth Engine. The goal of these embeddings is to serve as a highly general geospatial representation for a huge amount of downstream applications, without the need for retraining. 
 
 > [!NOTE]
-> This model is a work in progress and was not actually trained on the full dataset, it is just a framework that provides a general base for the paper's architecture. The code is simplified compared to the DeepMind's actual implementation (in JAX). 
+> I trained this model on 1/40th of the Landsat subset of the OlmoEarth pretrain dataset instead of the AlphaEarth Foundations dataset. Due to resource limitations, I only used a batch size of 16 and a max number of steps of 20000, instead of the 256 batch size and 100000 steps in the paper.
 
 ### Key parts of the methodology
 
@@ -29,14 +29,6 @@ The STP encoder processes multi-temporal, multi-source data through three simult
 3. **Text Alignment Model**: Enables text-image contrastive learning
 
 
-## Data Sources
-
-The model is trained on many data sources including:
-- **Optical**: Sentinel-2, Landsat 8/9. *Note: for simplicty, my implementation only supports Sentinel-2, but it should be relatively straightforward to add new datasets to the training*
-- **Radar**: Sentinel-1, PALSAR2
-- **LiDAR**: GEDI
-- **Environmental**: GLO-30, ERA5-Land, GRACE
-- **Annotated/Text**: NLCD, Wikipedia
 
 ## Installation
 
@@ -52,9 +44,15 @@ uv pip install -r requirements.txt
 uv pip install -e .
 ```
 
-How to run a training step:
+How to run a training step using the OlmoEarth pretrain dataset:
 ```
-python -m alphaearth.run_train
+python -m alphaearth.run_train_olmoearth \
+    --data_dir ./data/olmoearth_pretrain_dataset/10_landsat_monthly \
+    --batch_size 32 \
+    --num_workers 4 \
+    --patch_size 256 \
+    --max_steps 20000 \
+    --output_dir ./outputs_olmoearth
 ```
 
 ## Paper Citation

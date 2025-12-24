@@ -61,10 +61,12 @@ class TimePooling(nn.Module):
             mask_flat = mask_flat.reshape(BHW, self.num_heads, T)      # (BHW,heads,T)
             logits = logits.masked_fill(mask_flat == 0, float('-inf'))
 
-        attn = torch.softmax(logits, dim=-1)                           # (BHW, heads, T)
-
-        # weighted sum over time -> (BHW, heads, d)
-        z = torch.einsum('bht,bhtd->bhd', attn, V)                     # (BHW, heads, d)
+        attn = torch.softmax(logits, dim=-1)
+        
+        if attn.dim() == 2:
+            attn = attn.unsqueeze(-1)
+        
+        z = torch.einsum('bht,bhtd->bhd', attn, V)
         z = z.reshape(BHW, self.num_heads * self.head_dim)
         z = self.out(z).view(B, H, W, C)                               # (B,H,W,C)
         return z
@@ -286,6 +288,7 @@ class AlphaEarthFoundations(nn.Module):
         ts_center = ts.mean(dim=1)  # (B,)
 
         reconstructions: Dict[str, torch.Tensor] = {}
+        B, T, H, W, _ = x.shape
         for src, _ch in self.decode_sources.items():
             recon = self.decoder(
                 embeddings=mu_t,
@@ -294,7 +297,13 @@ class AlphaEarthFoundations(nn.Module):
                 valid_period=(vp[:, 0], vp[:, 1]) if isinstance(vp, tuple) else (vp[:, 0], vp[:, 1]),
                 source=src,
                 num_samples=num_decode_samples,
-            )  # (B, S, H', W', C_src)
+            )  # (B, S, H/2, W/2, C_src)
+            
+            # Upsample to original resolution
+            B_recon, S, H_recon, W_recon, C_recon = recon.shape
+            recon_2d = rearrange(recon, 'b s h w c -> (b s) c h w')
+            recon_2d = F.interpolate(recon_2d, size=(H, W), mode='bilinear', align_corners=False)
+            recon = rearrange(recon_2d, '(b s) c h w -> b s h w c', b=B_recon, s=S)
             reconstructions[src] = recon
 
         # Image-level pooled embeddings (for text alignment)

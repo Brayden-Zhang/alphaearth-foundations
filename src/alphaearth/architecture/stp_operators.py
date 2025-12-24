@@ -28,8 +28,7 @@ class SpaceOperator(nn.Module):
         )
         
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        # x: (B, T, H, W, C) at 1/16L resolution
-        B, T, H, W, C = x.shape # batch, temporal length (# of frames), height of spatial grid, width, channels
+        B, T, H, W, C = x.shape
         x_flat = rearrange(x, 'b t h w c -> (b t) (h w) c')
         
         # Self-attention
@@ -47,7 +46,6 @@ class SpaceOperator(nn.Module):
         x_attn = attn @ v
         x_attn = rearrange(x_attn, 'bt heads hw d -> bt hw (heads d)')
         x_flat = residual + self.proj(x_attn)
-
         x_flat = x_flat + self.mlp(self.norm2(x_flat))
         
         return rearrange(x_flat, '(b t) (h w) c -> b t h w c', b=B, t=T, h=H, w=W)
@@ -82,13 +80,31 @@ class TimeOperator(nn.Module):
         # x: (B, T, H, W, C) video tensor at 1/8L resolution. 
         B, T, H, W, C = x.shape
         
-        time_enc = self.time_encoding(timestamps)  # (B, T, C)
+        if timestamps.dim() == 1:
+            timestamps = timestamps.view(B, T)
         
-        # Reshape for temporal attention: for each spatial location (h,w), attend over t tokens
-        x_flat = rearrange(x, 'b t h w c -> (b h w) t c')
+        if timestamps.shape[1] != T:
+            if timestamps.shape[1] > T:
+                timestamps = timestamps[:, :T]
+            else:
+                last_ts = timestamps[:, -1:]
+                padding = last_ts.repeat(1, T - timestamps.shape[1])
+                timestamps = torch.cat([timestamps, padding], dim=1)
         
-        # Add time conditioning
-        x = x + time_enc[:, :, None, None, :]   # broadcast over H, W
+        time_enc = self.time_encoding(timestamps)
+        
+        if time_enc.dim() == 2:
+            time_enc = time_enc.unsqueeze(1).expand(B, T, C)
+        elif time_enc.shape[1] != T:
+            if time_enc.shape[1] > T:
+                time_enc = time_enc[:, :T, :]
+            else:
+                last_enc = time_enc[:, -1:, :]
+                padding = last_enc.repeat(1, T - time_enc.shape[1], 1)
+                time_enc = torch.cat([time_enc, padding], dim=1)
+        
+        time_enc = time_enc.unsqueeze(2).unsqueeze(3)
+        x = x + time_enc
         x_flat = rearrange(x, 'b t h w c -> (b h w) t c')
 
         # Self-attention across time
@@ -106,11 +122,8 @@ class TimeOperator(nn.Module):
         x_attn = attn @ v
         x_attn = rearrange(x_attn, 'bhw heads t d -> bhw t (heads d)')
         x_flat = residual + self.proj(x_attn)
-
-        # MLP
         x_flat = x_flat + self.mlp(self.norm2(x_flat))
         
-        # Reshape back
         return rearrange(x_flat, '(b h w) t c -> b t h w c', b=B, h=H, w=W)
 
 
@@ -130,7 +143,6 @@ class PrecisionOperator(nn.Module):
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         # x: (B, T, H, W, C) at 1/2L resolution
         B, T, _, _, _ = x.shape
-        # Reshape for convolution
         x_conv = rearrange(x, 'b t h w c -> (b t) c h w')
         
         # Residual connection
