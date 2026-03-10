@@ -1,7 +1,6 @@
 # AlphaEarth Foundations
 
-A PyTorch implementation of the AlphaEarth geospatial foundation model from Google DeepMind, which generates Earth embeddings for global environmental monitoring and analysis.
-Accompanying the paper is a global dataset of embeddings from 2017 to 2024, available through Earth Engine. The goal of these embeddings is to serve as a highly general geospatial representation for a huge amount of downstream applications, without the need for retraining. 
+An unofficial PyTorch implementation of the AlphaEarth geospatial foundation model from Google DeepMind, which generates Earth embeddings for global environmental monitoring and analysis.
 
 > [!NOTE]
 > I trained this model on 1/40th of the Landsat subset of the OlmoEarth pretrain dataset instead of the AlphaEarth Foundations dataset. Due to resource limitations, I only used a batch size of 16 and a max number of steps of 20000, instead of the 256 batch size and 100000 steps in the paper.
