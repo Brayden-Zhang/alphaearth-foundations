@@ -9,3 +9,5 @@
 *.pyc
 
 data/olmoearth_pretrain_dataset/
+# large checkpoints live in GitHub Releases (ckpt-v1), not in git/LFS
+outputs_olmoearth/checkpoint_latest.pt
